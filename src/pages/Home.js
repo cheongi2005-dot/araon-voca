@@ -11,19 +11,17 @@ function Home() {
   // ✨ 배경색 및 시스템 설정 동기화 ✨
   useEffect(() => {
     const root = window.document.documentElement;
-    const body = window.document.body; // 브라우저 전체 배경
+    const body = window.document.body; 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
 
     if (isDark) { 
       root.classList.add('dark'); 
       localStorage.setItem('theme', 'dark'); 
-      // 다크 모드: 모니터 전체 배경을 명품 블랙으로
       body.style.backgroundColor = '#0A0A0B'; 
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#0A0A0B');
     } else { 
       root.classList.remove('dark'); 
       localStorage.setItem('theme', 'light'); 
-      // 라이트 모드: 모니터 전체 배경을 깨끗한 화이트로
       body.style.backgroundColor = '#F8F9FA'; 
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#F8F9FA');
     }
@@ -45,7 +43,15 @@ function Home() {
 
   const resetAllData = () => {
     if (window.confirm('모든 학습 기록과 오답 노트를 초기화할까요?')) {
-      const keys = ['araon_voca_elementary_100', 'araon_voca_level_1', 'araon_voca_level_2', 'araon_voca_level_3', 'araon_voca_level_4'];
+      // ✨ Level 5 저장 키 추가 ✨
+      const keys = [
+        'araon_voca_elementary_100', 
+        'araon_voca_level_1', 
+        'araon_voca_level_2', 
+        'araon_voca_level_3', 
+        'araon_voca_level_4',
+        'araon_voca_level_5'
+      ];
       keys.forEach(key => localStorage.removeItem(key));
       window.location.reload();
     }
@@ -56,11 +62,12 @@ function Home() {
     { id: "02", name: "Essential Mastery", sub: "Level 1 (초등 필수)", path: "/level-1", color: "#E29526" },     
     { id: "03", name: "Intermediate Mastery", sub: "Level 2 (중등 기초)", path: "/level-2", color: "#9CAF88" },  
     { id: "04", name: "Advanced Mastery", sub: "Level 3 (중등 심화)", path: "/level-3", color: "#006039" },      
-    { id: "05", name: "Expert Mastery", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#151E3D" },        
+    { id: "05", name: "Expert Mastery", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#151E3D" },
+    // ✨ 06번 Level 5: 고등 심화 추가 ✨
+    { id: "06", name: "Academic Mastery", sub: "Level 5 (고등 심화)", path: "/level-5", color: "#32127A" },        
   ];
 
   return (
-    /* pt-24를 통해 상단 로고 가림 방지 */
     <div className="min-h-screen transition-colors duration-500 font-sans pt-24">
       <div className="max-w-md mx-auto flex flex-col px-8 pb-24">
         
@@ -75,7 +82,6 @@ function Home() {
               Vocabulary System
             </p>
           </div>
-          {/* ✨ 다크모드/라이트모드 전환 버튼 ✨ */}
           <button 
             onClick={() => setIsDark(!isDark)} 
             className="p-3 rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-md border border-zinc-100 dark:border-zinc-800 text-zinc-400 active:scale-90 transition-transform"
