@@ -1077,7 +1077,6 @@ const Level4 = () => {
     const [score, setScore] = useState(0);
     const [showFeedback, setShowFeedback] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState(null); 
-    
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
     const [voices, setVoices] = useState([]);
     const [currentSessionMistakes, setCurrentSessionMistakes] = useState([]);
@@ -1091,17 +1090,28 @@ const Level4 = () => {
         return saved ? JSON.parse(saved) : {};
     });
 
-    // 선생님께서 말씀하신 피드백 메시지 객체
     const feedbackMessages = {
         high: [{ title: "EXPERT!", text: "전문가 수준의 어휘력을 갖추셨군요!" }, { title: "OUTSTANDING!", text: "정말 대단한 성취입니다!" }],
         mid: [{ title: "GOOD!", text: "잘하고 있습니다. 조금 더 정밀하게 다듬어봅시다." }, { title: "KEEP IT UP", text: "고지가 멀지 않았습니다!" }],
         low: [{ title: "NICE TRY", text: "어려운 단어들이지만 포기하지 마세요." }, { title: "PRACTICE MORE", text: "매일 조금씩 나아가는 것이 중요합니다." }]
     };
 
+    // ✨ 전역 배경색 및 시스템 테마 동기화 ✨
     useEffect(() => {
         const root = window.document.documentElement;
-        if (isDarkMode) { root.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
-        else { root.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
+        const body = window.document.body;
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+        if (isDarkMode) {
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            body.style.backgroundColor = '#0A0A0B'; // 컴퓨터 뷰 다크 배경
+        } else {
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            body.style.backgroundColor = '#F8F9FA'; // 컴퓨터 뷰 라이트 배경
+        }
+        if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
     }, [isDarkMode]);
 
     useEffect(() => {
@@ -1201,18 +1211,27 @@ const Level4 = () => {
     }, [history, selectedDay]);
 
     return (
-        <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[#F8F9FA] dark:bg-[#121212] transition-all duration-300 font-sans">
-            <header className="sticky top-0 z-20 h-16 flex items-center px-4 justify-between transition-colors border-b border-black/10" 
-                    style={{ backgroundColor: themeColor }}>
-                <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
-                    <i className="ph-bold ph-caret-left text-2xl"></i>
-                </button>
-                <div className="flex flex-col items-center">
-                    <img src="/Araon_logo_b.png" alt="ARAON SCHOOL" className="h-6 w-auto object-contain select-none mb-1 invert brightness-200" />
+        /* 배경색: 라이트 모드(#F8F9FA), 다크 모드(#0A0A0B) 동기화 */
+        <div className="min-h-screen flex flex-col max-w-md mx-auto transition-all duration-300 font-sans">
+            
+            {/* ✨ 헤더: 시스템 상단 바 영역(노치) 확보 ✨ */}
+            <header className="sticky top-0 z-20 flex flex-col transition-colors border-b border-black/10 shadow-sm" 
+                    style={{ 
+                        backgroundColor: themeColor, 
+                        paddingTop: 'env(safe-area-inset-top)', 
+                        minHeight: 'calc(70px + env(safe-area-inset-top))' 
+                    }}>
+                <div className="flex-1 flex items-center px-4 justify-between w-full h-16">
+                    <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
+                        <i className="ph-bold ph-caret-left text-2xl"></i>
+                    </button>
+                    <div className="flex flex-col items-center">
+                        <img src="/Araon_logo_b.png" alt="ARAON SCHOOL" className="h-7 w-auto object-contain select-none invert brightness-200" />
+                    </div>
+                    <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
+                        <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
+                    </button>
                 </div>
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
-                    <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
-                </button>
             </header>
 
             <main className="flex-1 p-6 overflow-y-auto">
@@ -1223,7 +1242,6 @@ const Level4 = () => {
                             <div className="flex justify-between items-center mb-3 px-1">
                                 <p className="text-white/70 text-[10px] font-black uppercase tracking-widest">Expert Mastery</p>
                                 <div className="flex items-center space-x-2 font-black">
-                                    {/* ✨ 진행도를 25일 기준으로 수정 ✨ */}
                                     <span className="text-xs opacity-90">{Object.values(history).filter(h => h.completed).length} / 25 완료</span>
                                     <span className="text-xl tracking-tighter">{Math.round((Object.values(history).filter(h => h.completed).length / 25) * 100)}%</span>
                                 </div>
@@ -1234,7 +1252,7 @@ const Level4 = () => {
                         </div>
                         
                         <div className="grid grid-cols-1 gap-4 pb-10">
-                            {Object.keys(DAY_TITLES).sort((a,b)=>a-b).map(d => (
+                            {Object.keys(DAY_TITLES).sort((a,b)=>Number(a)-Number(b)).map(d => (
                                 <button key={d} onClick={() => { setSelectedDay(d); setView('menu'); }} 
                                         className={`p-6 rounded-[2.2rem] border-2 flex items-center justify-between transition-all active:scale-[0.97] ${history[d]?.completed ? 'bg-white border-slate-200 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-inner' : 'bg-white border-slate-100 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-sm'}`}>
                                     <div className="flex items-center">
@@ -1251,7 +1269,6 @@ const Level4 = () => {
                     </div>
                 )}
 
-                {/* ... (중간 메뉴, 리스트, 오답노트 뷰는 이전과 동일) ... */}
                 {view === 'menu' && (
                     <div className="animate__animated animate__fadeInUp flex flex-col pt-10">
                         <div className="text-center mb-12">
@@ -1308,7 +1325,6 @@ const Level4 = () => {
                     <div className="animate__animated animate__fadeIn text-center py-10 px-4">
                         <div className="w-28 h-28 text-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl border-b-4 border-black/20" style={{ backgroundColor: themeColor }}><i className="ph-fill ph-crown text-6xl"></i></div>
                         
-                        {/* ✨ 피드백 메시지 출력 구역 (Title + Text) ✨ */}
                         {(() => {
                             const level = score >= (questions.length * 0.8) ? 'high' : score >= (questions.length * 0.5) ? 'mid' : 'low';
                             const msg = feedbackMessages[level][randomIdx];
@@ -1328,7 +1344,6 @@ const Level4 = () => {
                     </div>
                 )}
 
-                {/* 리스트 및 오답노트 생략 (이전 코드와 동일) */}
                 {view === 'list' && (
                     <div className="animate__animated animate__fadeIn pb-10">
                         <div className="mb-6 text-center"><h3 className="text-lg font-black dark:text-white">{DAY_TITLES[selectedDay]}</h3></div>
@@ -1345,6 +1360,7 @@ const Level4 = () => {
                         </div>
                     </div>
                 )}
+
                 {view === 'mistakes' && (
                     <div className="animate__animated animate__fadeIn pb-10">
                         <div className="text-center mb-8 px-1"><span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: mistakeColor }}>Cumulative Analysis</span><h3 className="text-xl font-black mt-1 dark:text-white">내 오답 리스트</h3></div>

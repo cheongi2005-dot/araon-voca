@@ -291,15 +291,30 @@ const Level3 = () => {
         ]
     };
 
+    // ✨ 전역 배경색 및 시스템 테마 동기화 로직 ✨
     useEffect(() => {
-        document.documentElement.classList.toggle('dark', isDarkMode);
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        const root = window.document.documentElement;
+        const body = window.document.body;
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+        if (isDarkMode) {
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            body.style.backgroundColor = '#0A0A0B'; // 컴퓨터 뷰 다크 배경 설정
+        } else {
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            body.style.backgroundColor = '#F8F9FA'; // 컴퓨터 뷰 라이트 배경 설정
+        }
+        
+        // 상단바를 레벨 고유 색상으로 고정
+        if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
     }, [isDarkMode]);
 
     useEffect(() => {
         const loadVoices = () => {
             const available = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
-            setVoices(available);
+            setVoices(available); // eslint 경고 해결
         };
         loadVoices();
         window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -359,12 +374,13 @@ const Level3 = () => {
                 setCurrentIndex(c => c + 1); setShowFeedback(false); setSelectedAnswer(null);
             } else {
                 setRandomIdx(Math.floor(Math.random() * 2));
+                const finalScore = isCorrect ? score + 1 : score;
                 setHistory(prev => ({
                     ...prev, 
                     [selectedDay]: { 
                         ...prev[selectedDay],
                         completed: true, 
-                        bestScore: Math.max((prev[selectedDay]?.bestScore || 0), (isCorrect ? score + 1 : score)), 
+                        bestScore: Math.max((prev[selectedDay]?.bestScore || 0), finalScore), 
                         total: questions.length
                     }
                 }));
@@ -394,32 +410,39 @@ const Level3 = () => {
     }, [history, selectedDay]);
 
     return (
-        <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[#F8F9FA] dark:bg-[#121212] transition-all duration-300">
-            {/* Header: 로고 적용 구역 */}
-            <header className="sticky top-0 z-20 h-16 flex items-center px-4 justify-between transition-colors border-b border-black/10" 
-                    style={{ backgroundColor: themeColor }}>
-                <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
-                    <i className="ph-bold ph-caret-left text-2xl"></i>
-                </button>
-                {/* ✨ 텍스트 대신 공식 로고(화이트) 적용 ✨ */}
-                <div className="flex flex-col items-center">
-                    <img 
-                      src="/Araon_logo_b.png" 
-                      alt="ARAON SCHOOL" 
-                      className="h-6 w-auto object-contain select-none mb-1 invert brightness-200"
-                    />
+        /* 배경색: 라이트(#F8F9FA), 다크(#0A0A0B) */
+        <div className="min-h-screen flex flex-col max-w-md mx-auto transition-all duration-300 font-sans">
+            
+            {/* ✨ 헤더: 시스템 노치 영역(safe-area) 여백 확보 및 컬러 적용 ✨ */}
+            <header className="sticky top-0 z-20 flex flex-col transition-colors border-b border-black/10 shadow-sm" 
+                    style={{ 
+                        backgroundColor: themeColor, 
+                        paddingTop: 'env(safe-area-inset-top)', 
+                        minHeight: 'calc(70px + env(safe-area-inset-top))' 
+                    }}>
+                <div className="flex-1 flex items-center px-4 justify-between w-full h-16">
+                    <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
+                        <i className="ph-bold ph-caret-left text-2xl"></i>
+                    </button>
+                    <div className="flex flex-col items-center">
+                        <img 
+                          src="/Araon_logo_b.png" 
+                          alt="ARAON SCHOOL" 
+                          className="h-7 w-auto object-contain select-none invert brightness-200"
+                        />
+                    </div>
+                    <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
+                        <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
+                    </button>
                 </div>
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
-                    <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
-                </button>
             </header>
 
             <main className="flex-1 p-6 overflow-y-auto">
                 {view === 'home' && (
                     <div className="animate__animated animate__fadeIn">
-                        <div className="p-8 rounded-[2rem] text-white shadow-xl mb-8 border border-white/5" 
+                        <div className="p-8 rounded-[2.2rem] text-white shadow-xl mb-8 border border-white/5" 
                              style={{ backgroundColor: themeColor }}>
-                            <div className="flex justify-between items-center mb-3">
+                            <div className="flex justify-between items-center mb-3 px-1">
                                 <p className="text-white/70 text-[10px] font-black uppercase tracking-widest">Advanced Mastery</p>
                                 <div className="flex items-center space-x-2 font-black">
                                     <span className="text-xs opacity-90">{Object.values(history).filter(h => h.completed).length} / 30 완료</span>
@@ -432,9 +455,9 @@ const Level3 = () => {
                         </div>
                         
                         <div className="grid grid-cols-1 gap-4 pb-10">
-                            {Object.keys(DAY_TITLES).sort((a,b)=>a-b).map(d => (
+                            {Object.keys(DAY_TITLES).sort((a,b)=>Number(a)-Number(b)).map(d => (
                                 <button key={d} onClick={() => { setSelectedDay(d); setView('menu'); }} 
-                                        className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all active:scale-[0.97] ${history[d]?.completed ? 'bg-white border-slate-200 dark:bg-[#1E1E1E] dark:border-slate-800' : 'bg-white border-slate-100 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-sm'}`}>
+                                        className={`p-6 rounded-[2.2rem] border-2 flex items-center justify-between transition-all active:scale-[0.97] ${history[d]?.completed ? 'bg-white border-slate-200 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-inner' : 'bg-white border-slate-100 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-sm'}`}>
                                     <div className="flex items-center">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 text-white`} 
                                              style={{ backgroundColor: history[d]?.completed ? themeColor : '#cbd5e1' }}>
@@ -456,15 +479,15 @@ const Level3 = () => {
                             <h2 className="text-2xl font-black dark:text-white uppercase px-4 break-keep">{DAY_TITLES[selectedDay]}</h2>
                         </div>
                         <div className="space-y-4">
-                            <button onClick={() => setView('list')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: themeColor }}>
+                            <button onClick={() => setView('list')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2.2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: themeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${themeColor}20`, color: themeColor }}><i className="ph-fill ph-book-open text-2xl"></i></div>
-                                <div className="text-left"><h3 className="font-bold dark:text-slate-100">단어 학습</h3><p className="text-slate-400 text-xs">Vocabulary</p></div>
+                                <div className="text-left"><h3 className="font-bold dark:text-slate-100">단어 학습</h3><p className="text-slate-400 text-xs font-bold">Vocabulary</p></div>
                             </button>
-                            <button onClick={startQuiz} className="w-full p-6 text-white rounded-[2rem] flex items-center shadow-lg active:scale-95 transition-all" style={{ backgroundColor: themeColor }}>
+                            <button onClick={startQuiz} className="w-full p-6 text-white rounded-[2.2rem] flex items-center shadow-lg active:scale-95 transition-all" style={{ backgroundColor: themeColor }}>
                                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4"><i className="ph-fill ph-lightning text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold">퀴즈 시작</h3><p className="text-white/60 text-xs font-bold">Start Quiz</p></div>
                             </button>
-                            <button onClick={() => setView('mistakes')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: mistakeColor }}>
+                            <button onClick={() => setView('mistakes')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2.2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: mistakeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${mistakeColor}20`, color: mistakeColor }}><i className="ph-fill ph-warning-circle text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold" style={{ color: mistakeColor }}>오답노트</h3><p className="text-slate-400 text-xs font-bold">Review</p></div>
                             </button>
@@ -480,8 +503,8 @@ const Level3 = () => {
                                 <div className="h-full transition-all" style={{ width: `${((currentIndex + 1) / questions.length) * 100}%`, backgroundColor: themeColor }}></div>
                             </div>
                         </div>
-                        <div className="text-center mb-16 pt-10">
-                            <h3 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter">{questions[currentIndex].word}</h3>
+                        <div className="text-center mb-16 pt-10 px-2">
+                            <h3 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter break-keep leading-tight">{questions[currentIndex].word}</h3>
                             <button onClick={() => speak(questions[currentIndex].word)} className="mt-8 text-slate-300 hover:text-slate-500 transition-colors"><i className="ph-bold ph-speaker-high text-3xl"></i></button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
@@ -489,14 +512,10 @@ const Level3 = () => {
                                 const isCorrectOption = opt.word === questions[currentIndex].word;
                                 const isSelected = selectedAnswer === opt;
                                 const isSelectedIncorrect = isSelected && !isCorrectOption;
-
                                 return (
                                     <button key={i} disabled={showFeedback} onClick={() => handleAnswer(opt)}
-                                        className={`p-6 rounded-[2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm active:scale-95' : isCorrectOption ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg scale-105' : (isSelected ? 'text-white' : 'opacity-20 bg-slate-100 dark:bg-slate-800')}`}
-                                        style={{ 
-                                            borderColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined,
-                                            backgroundColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined
-                                        }}>
+                                        className={`p-6 rounded-[2.2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm active:scale-95' : isCorrectOption ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg scale-105' : (isSelected ? 'text-white' : 'opacity-20 bg-slate-100 dark:bg-slate-800')}`}
+                                        style={{ borderColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined, backgroundColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined }}>
                                         {opt.meaning}
                                     </button>
                                 );
@@ -511,7 +530,7 @@ const Level3 = () => {
                         <div className="space-y-3">
                             {DATA_BY_DAY[Number(selectedDay)]?.map((item, idx) => (
                                 <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-sm">
-                                    <div className="flex-1 pr-2"><div className="text-xl font-bold dark:text-white">{item.word}</div><div className="text-slate-500 text-sm mt-1">{item.meaning}</div></div>
+                                    <div className="flex-1 pr-2"><div className="text-xl font-bold dark:text-white">{item.word}</div><div className="text-slate-500 text-sm mt-1 font-medium">{item.meaning}</div></div>
                                     <button onClick={() => speak(item.word)} className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-90 transition-transform" style={{ backgroundColor: `${themeColor}15`, color: themeColor }}><i className="ph-bold ph-speaker-high text-xl"></i></button>
                                 </div>
                             ))}
@@ -538,7 +557,7 @@ const Level3 = () => {
                 )}
                 
                 {view === 'result' && (
-                    <div className="animate__animated animate__fadeIn text-center py-10">
+                    <div className="animate__animated animate__fadeIn text-center py-10 px-4">
                         <div className="w-28 h-28 text-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl border-b-4 border-black/20" style={{ backgroundColor: themeColor }}><i className="ph-fill ph-crown text-6xl"></i></div>
                         <h2 className="text-3xl font-black mb-10 italic uppercase dark:text-white break-keep">{feedbackMessages[score >= (questions.length * 0.8) ? 'high' : score >= (questions.length * 0.5) ? 'mid' : 'low'][randomIdx].title}</h2>
                         <div className="w-full p-10 rounded-[3rem] text-white mb-10 border-t-4 border-white/20 shadow-2xl" style={{ backgroundColor: themeColor }}>
