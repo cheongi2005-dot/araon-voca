@@ -1,5 +1,3 @@
-// src/pages/Home.js 전체 교체
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -10,6 +8,7 @@ function Home() {
     parseInt(localStorage.getItem('araon_voca_voice_idx') || '0')
   );
 
+  // 럭셔리 다크 모드 및 시스템 상태바 동기화
   useEffect(() => {
     const root = window.document.documentElement;
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -17,10 +16,12 @@ function Home() {
     if (isDark) { 
       root.classList.add('dark'); 
       localStorage.setItem('theme', 'dark'); 
+      // 다크 모드 시 시스템 상태바를 Midnight Noir로 변경
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#0A0A0B');
     } else { 
       root.classList.remove('dark'); 
       localStorage.setItem('theme', 'light'); 
+      // 라이트 모드 시 시스템 상태바를 기본 배경색으로 변경
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#F8F9FA');
     }
   }, [isDark]);
@@ -56,11 +57,9 @@ function Home() {
   ];
 
   return (
-    /* ✨ pt-20 (약 80px)을 주어 아이폰 상단 바 아이콘에 로고가 절대 겹치지 않게 합니다 ✨ */
-    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0A0A0B] text-[#1A1A1A] dark:text-[#E0E0E0] p-8 pb-24 transition-colors duration-500 font-sans pt-20">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0A0A0B] text-[#1A1A1A] dark:text-[#E0E0E0] p-8 pb-24 transition-colors duration-500 font-sans pt-24">
       <div className="max-w-md mx-auto flex flex-col">
         
-        {/* Header: 로고가 이제 노치 아래로 확실히 내려옵니다 */}
         <header className="flex justify-between items-start mb-12">
           <div className="flex flex-col">
             <img 
@@ -74,7 +73,7 @@ function Home() {
           </div>
           <button 
             onClick={() => setIsDark(!isDark)} 
-            className="p-2.5 rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-sm border border-zinc-100 dark:border-zinc-800 text-zinc-400"
+            className="p-2.5 rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-sm border border-zinc-100 dark:border-zinc-800 text-zinc-400 active:scale-90 transition-transform"
           >
             <i className={`ph-bold ${isDark ? 'ph-sun' : 'ph-moon'} text-lg`}></i>
           </button>
