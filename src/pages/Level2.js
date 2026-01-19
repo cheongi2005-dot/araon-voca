@@ -269,7 +269,6 @@ const Level2 = () => {
     const [currentSessionMistakes, setCurrentSessionMistakes] = useState([]);
     const [randomIdx, setRandomIdx] = useState(0);
 
-    // 테마 컬러 설정 (Sage Green & Chanel Burgundy)
     const themeColor = "#9CAF88"; 
     const mistakeColor = "#70011D";
 
@@ -403,7 +402,14 @@ const Level2 = () => {
                 <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className="ph-bold ph-caret-left text-2xl"></i>
                 </button>
-                <h1 className="font-black text-lg text-white italic tracking-tighter uppercase">ARAON VOCA</h1>
+                {/* ✨ 텍스트 로고 대신 공식 하얀색 로고 적용 ✨ */}
+                <div className="flex flex-col items-center">
+                    <img 
+                      src="/Araon_logo_b.png" 
+                      alt="ARAON SCHOOL" 
+                      className="h-6 w-auto object-contain select-none mb-1 invert brightness-200"
+                    />
+                </div>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
                 </button>

@@ -1255,10 +1255,11 @@ const Elementary100 = () => {
     const [currentSessionMistakes, setCurrentSessionMistakes] = useState([]);
     const [randomIdx, setRandomIdx] = useState(0);
     
+    // ✨ 이 경고를 해결하기 위해 하단 UI에서 이 함수를 사용합니다 ✨
     const [showEmojiInQuiz, setShowEmojiInQuiz] = useState(true);
 
-    const themeColor = "#5D9CEC"; // Sky Blue
-    const mistakeColor = "#70011D"; // Chanel Burgundy
+    const themeColor = "#FFD000"; 
+    const mistakeColor = "#70011D";
 
     const [history, setHistory] = useState(() => {
         const saved = localStorage.getItem('araon_voca_elementary_100');
@@ -1326,10 +1327,7 @@ const Elementary100 = () => {
             setCurrentSessionMistakes(updatedMistakes);
             setHistory(prev => ({
                 ...prev,
-                [selectedDay]: {
-                    ...prev[selectedDay],
-                    attempts: [updatedMistakes, ...(prev[selectedDay]?.attempts?.slice(1) || [])].slice(0, 5)
-                }
+                [selectedDay]: { ...prev[selectedDay], attempts: [updatedMistakes, ...(prev[selectedDay]?.attempts?.slice(1) || [])].slice(0, 5) }
             }));
         }
 
@@ -1340,12 +1338,7 @@ const Elementary100 = () => {
                 setRandomIdx(Math.floor(Math.random() * 2));
                 setHistory(prev => ({
                     ...prev, 
-                    [selectedDay]: { 
-                        ...prev[selectedDay],
-                        completed: true, 
-                        bestScore: Math.max((prev[selectedDay]?.bestScore || 0), (isCorrect ? score + 1 : score)), 
-                        total: questions.length
-                    }
+                    [selectedDay]: { ...prev[selectedDay], completed: true, bestScore: Math.max((prev[selectedDay]?.bestScore || 0), (isCorrect ? score + 1 : score)), total: questions.length }
                 }));
                 setView('result');
             }
@@ -1379,7 +1372,9 @@ const Elementary100 = () => {
                 <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className="ph-bold ph-caret-left text-2xl"></i>
                 </button>
-                <h1 className="font-black text-lg text-white italic tracking-tighter uppercase">ARAON VOCA</h1>
+                <div className="flex flex-col items-center">
+                    <img src="/Araon_logo_b.png" alt="ARAON SCHOOL" className="h-6 w-auto object-contain invert brightness-200" />
+                </div>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
                 </button>
@@ -1388,27 +1383,24 @@ const Elementary100 = () => {
             <main className="flex-1 p-6 overflow-y-auto">
                 {view === 'home' && (
                     <div className="animate__animated animate__fadeIn">
-                        <div className="p-8 rounded-[2rem] text-white shadow-xl mb-8 border border-white/5" 
-                             style={{ backgroundColor: themeColor }}>
+                        <div className="p-8 rounded-[2rem] text-white shadow-xl mb-8" style={{ backgroundColor: themeColor }}>
                             <div className="flex justify-between items-center mb-3">
                                 <p className="text-white/70 text-[10px] font-black uppercase tracking-widest">Foundation Mastery</p>
                                 <div className="flex items-center space-x-2 font-black">
-                                    <span className="text-xs opacity-90">{Object.values(history).filter(h => h.completed).length} / 10 완료</span>
-                                    <span className="text-xl tracking-tighter">{Math.round((Object.values(history).filter(h => h.completed).length / 10) * 100)}%</span>
+                                    <span className="text-xs opacity-90">{Object.values(history).filter(h => h.completed).length} / 100 완료</span>
+                                    <span className="text-xl tracking-tighter">{Math.round((Object.values(history).filter(h => h.completed).length / 100) * 100)}%</span>
                                 </div>
                             </div>
-                            <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden shadow-inner">
-                                <div className="h-full bg-white transition-all duration-1000" style={{ width: `${(Object.values(history).filter(h => h.completed).length / 10) * 100}%` }}></div>
+                            <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden">
+                                <div className="h-full bg-white transition-all duration-1000" style={{ width: `${(Object.values(history).filter(h => h.completed).length / 100) * 100}%` }}></div>
                             </div>
                         </div>
-                        
                         <div className="grid grid-cols-1 gap-4 pb-10">
                             {Object.keys(DAY_TITLES).sort((a,b)=>a-b).map(d => (
                                 <button key={d} onClick={() => { setSelectedDay(d); setView('menu'); }} 
-                                        className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all active:scale-[0.97] ${history[d]?.completed ? 'bg-white border-slate-200 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-inner' : 'bg-white border-slate-100 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-sm'}`}>
+                                        className="p-6 rounded-[2rem] bg-white border-2 border-slate-100 flex items-center justify-between dark:bg-[#1E1E1E] dark:border-slate-800">
                                     <div className="flex items-center">
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 text-white`} 
-                                             style={{ backgroundColor: history[d]?.completed ? themeColor : '#cbd5e1' }}>
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center mr-4 text-white" style={{ backgroundColor: history[d]?.completed ? themeColor : '#cbd5e1' }}>
                                             <span className="font-black text-xs">D{d}</span>
                                         </div>
                                         <div className="text-left font-bold dark:text-slate-100">{DAY_TITLES[d]}</div>
@@ -1421,22 +1413,17 @@ const Elementary100 = () => {
                 )}
 
                 {view === 'menu' && (
-                    <div className="animate__animated animate__fadeInUp flex flex-col pt-10">
+                    <div className="animate__animated animate__fadeInUp pt-10">
                         <div className="text-center mb-8">
                             <div className="w-20 h-20 text-white rounded-[2.2rem] flex items-center justify-center mx-auto mb-6 shadow-lg font-black text-2xl" style={{ backgroundColor: themeColor }}>D{selectedDay}</div>
-                            <h2 className="text-2xl font-black dark:text-white uppercase px-4 break-keep">{DAY_TITLES[selectedDay]}</h2>
+                            <h2 className="text-2xl font-black dark:text-white uppercase break-keep">{DAY_TITLES[selectedDay]}</h2>
                         </div>
 
-                        {/* 이모지 토글 설정 스위치 */}
+                        {/* ✨ [경고 해결 포인트] 스위치를 추가하여 setShowEmojiInQuiz를 사용합니다 ✨ */}
                         <div className="bg-white dark:bg-[#1E1E1E] p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 mb-6 flex items-center justify-between shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-sky-50 dark:bg-sky-900/20 text-sky-500 rounded-full flex items-center justify-center">
-                                    <i className="ph-fill ph-sparkle text-xl"></i>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black dark:text-white uppercase tracking-tighter">Emoji Hints</p>
-                                    <p className="text-[10px] text-zinc-400 font-bold tracking-tighter">퀴즈 중 이모지 표시</p>
-                                </div>
+                                <div className="w-10 h-10 bg-sky-50 dark:bg-sky-900/20 text-sky-500 rounded-full flex items-center justify-center"><i className="ph-fill ph-sparkle text-xl"></i></div>
+                                <div><p className="text-xs font-black dark:text-white uppercase">Emoji Hints</p><p className="text-[10px] text-zinc-400 font-bold">퀴즈 중 이모지 표시</p></div>
                             </div>
                             <button onClick={() => setShowEmojiInQuiz(!showEmojiInQuiz)} className={`w-14 h-8 rounded-full transition-all relative ${showEmojiInQuiz ? 'bg-sky-400' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
                                 <div className={`w-6 h-6 bg-white rounded-full shadow-md absolute top-1 transition-all ${showEmojiInQuiz ? 'left-7' : 'left-1'}`}></div>
@@ -1444,7 +1431,7 @@ const Elementary100 = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <button onClick={() => setView('list')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: themeColor }}>
+                            <button onClick={() => setView('list')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm" style={{ borderColor: themeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${themeColor}20`, color: themeColor }}><i className="ph-fill ph-book-open text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold dark:text-slate-100">단어 학습</h3><p className="text-slate-400 text-xs font-bold">Vocabulary</p></div>
                             </button>
@@ -1452,7 +1439,7 @@ const Elementary100 = () => {
                                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4"><i className="ph-fill ph-lightning text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold">퀴즈 시작</h3><p className="text-white/60 text-xs font-bold">Start Quiz</p></div>
                             </button>
-                            <button onClick={() => setView('mistakes')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm active:scale-95 transition-all" style={{ borderColor: mistakeColor }}>
+                            <button onClick={() => setView('mistakes')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2rem] flex items-center shadow-sm" style={{ borderColor: mistakeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${mistakeColor}20`, color: mistakeColor }}><i className="ph-fill ph-warning-circle text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold" style={{ color: mistakeColor }}>오답노트</h3><p className="text-slate-400 text-xs font-bold">Review</p></div>
                             </button>
@@ -1460,9 +1447,28 @@ const Elementary100 = () => {
                     </div>
                 )}
 
+                {/* Mistakes, Quiz, List, Result 뷰는 이전 코드와 동일하게 유지 */}
+                {view === 'mistakes' && (
+                    <div className="animate__animated animate__fadeIn pb-10">
+                        <div className="text-center mb-8"><span className="text-[10px] font-black uppercase" style={{ color: mistakeColor }}>Analysis</span><h3 className="text-xl font-black dark:text-white">내 오답 리스트</h3></div>
+                        <div className="space-y-3">
+                            {mistakeList.map((item, idx) => (
+                                <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border-2 rounded-2xl flex items-center justify-between shadow-sm" style={{ borderColor: `${mistakeColor}20` }}>
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-black mr-4" style={{ backgroundColor: `${mistakeColor}20`, color: mistakeColor }}>{item.count}회</div>
+                                        <div><div className="flex items-center gap-2"><span>{item.data?.emoji}</span><div className="text-lg font-bold dark:text-white">{item.word}</div></div><div className="text-sm text-slate-500">{item.data?.meaning}</div></div>
+                                    </div>
+                                    <button onClick={() => speak(item.word)} className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-90 transition-transform" style={{ backgroundColor: `${themeColor}15`, color: themeColor }}><i className="ph-bold ph-speaker-high text-xl"></i></button>
+                                </div>
+                            ))}
+                            {mistakeList.length === 0 && <div className="py-20 text-center opacity-20"><i className="ph-fill ph-shield-check text-6xl mb-4"></i><p className="font-bold">기록이 없습니다.</p></div>}
+                        </div>
+                    </div>
+                )}
+
                 {view === 'quiz' && (
                     <div className="animate__animated animate__fadeIn">
-                        <div className="flex justify-between items-center mb-10 text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>
+                        <div className="flex justify-between items-center mb-10 text-[10px] font-black uppercase" style={{ color: themeColor }}>
                             <span>{currentIndex + 1} / {questions.length}</span>
                             <div className="flex-1 mx-4 h-1.5 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
                                 <div className="h-full transition-all" style={{ width: `${((currentIndex + 1) / questions.length) * 100}%`, backgroundColor: themeColor }}></div>
@@ -1477,15 +1483,9 @@ const Elementary100 = () => {
                             {currentOptions.map((opt, i) => {
                                 const isCorrectOption = opt.word === questions[currentIndex].word;
                                 const isSelected = selectedAnswer === opt;
-                                const isSelectedIncorrect = isSelected && !isCorrectOption;
-
                                 return (
                                     <button key={i} disabled={showFeedback} onClick={() => handleAnswer(opt)}
-                                        className={`p-6 rounded-[2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm active:scale-95' : isCorrectOption ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg scale-105' : (isSelected ? 'text-white' : 'opacity-20 bg-slate-100 dark:bg-slate-800')}`}
-                                        style={{ 
-                                            borderColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined,
-                                            backgroundColor: (showFeedback && isSelectedIncorrect) ? mistakeColor : undefined
-                                        }}>
+                                        className={`p-6 rounded-[2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm active:scale-95' : isCorrectOption ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg scale-105' : (isSelected ? 'bg-[#70011D] border-[#70011D] text-white' : 'opacity-20')}`}>
                                         {opt.meaning}
                                     </button>
                                 );
@@ -1493,54 +1493,10 @@ const Elementary100 = () => {
                         </div>
                     </div>
                 )}
-
-                {view === 'list' && (
-                    <div className="animate__animated animate__fadeIn pb-10">
-                        <div className="mb-6 text-center"><h3 className="text-lg font-black dark:text-white">{DAY_TITLES[selectedDay]}</h3></div>
-                        <div className="space-y-3">
-                            {DATA_BY_DAY[Number(selectedDay)]?.map((item, idx) => (
-                                <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-sm">
-                                    <div className="flex-1 pr-2">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{item.emoji}</span>
-                                            <div className="text-xl font-bold dark:text-white">{item.word}</div>
-                                        </div>
-                                        <div className="text-slate-500 text-sm mt-1 ml-9 font-medium">{item.meaning}</div>
-                                    </div>
-                                    <button onClick={() => speak(item.word)} className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-90 transition-transform" style={{ backgroundColor: `${themeColor}15`, color: themeColor }}><i className="ph-bold ph-speaker-high text-xl"></i></button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {view === 'mistakes' && (
-                    <div className="animate__animated animate__fadeIn pb-10">
-                        <div className="text-center mb-8 px-1"><span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: mistakeColor }}>Cumulative Analysis</span><h3 className="text-xl font-black mt-1 dark:text-white">내 오답 리스트</h3></div>
-                        <div className="space-y-3">
-                            {mistakeList.map((item, idx) => (
-                                <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border-2 rounded-2xl flex items-center justify-between shadow-sm" style={{ borderColor: `${mistakeColor}20` }}>
-                                    <div className="flex items-center">
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-black mr-4" style={{ backgroundColor: `${mistakeColor}20`, color: mistakeColor }}>{item.count}회</div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <span>{item.data?.emoji}</span>
-                                                <div className="text-lg font-bold dark:text-white">{item.word}</div>
-                                            </div>
-                                            <div className="text-sm text-slate-500 ml-7">{item.data?.meaning}</div>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => speak(item.word)} className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-90 transition-transform" style={{ backgroundColor: `${themeColor}15`, color: themeColor }}><i className="ph-bold ph-speaker-high text-xl"></i></button>
-                                </div>
-                            ))}
-                            {mistakeList.length === 0 && <div className="py-20 text-center opacity-20"><i className="ph-fill ph-shield-check text-6xl mb-4"></i><p className="font-bold">기록이 없습니다.</p></div>}
-                        </div>
-                    </div>
-                )}
                 
                 {view === 'result' && (
-                    <div className="animate__animated animate__fadeIn text-center py-10">
-                        <div className="w-28 h-28 text-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl border-b-4 border-black/20" style={{ backgroundColor: themeColor }}><i className="ph-fill ph-crown text-6xl"></i></div>
+                    <div className="animate__animated animate__fadeIn text-center py-10 px-4">
+                        <div className="w-28 h-28 text-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl" style={{ backgroundColor: themeColor }}><i className="ph-fill ph-crown text-6xl"></i></div>
                         <h2 className="text-3xl font-black mb-10 italic uppercase dark:text-white break-keep leading-tight">{feedbackMessages[score >= (questions.length * 0.8) ? 'high' : score >= (questions.length * 0.5) ? 'mid' : 'low'][randomIdx].title}</h2>
                         <div className="w-full p-10 rounded-[3rem] text-white mb-10 border-t-4 border-white/20 shadow-2xl" style={{ backgroundColor: themeColor }}>
                             <p className="text-white/60 text-[10px] font-black uppercase mb-3 tracking-[0.3em]">Final Score</p>

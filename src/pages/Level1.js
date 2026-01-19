@@ -391,11 +391,9 @@ const Level1 = () => {
     const [currentSessionMistakes, setCurrentSessionMistakes] = useState([]);
     const [randomIdx, setRandomIdx] = useState(0);
     
-    // [기능] 퀴즈 중 이모지 표시 여부 설정
     const [showEmojiInQuiz, setShowEmojiInQuiz] = useState(true);
 
-    // [테마] Fendi Yellow & Chanel Burgundy
-    const themeColor = "#E29526"; 
+    const themeColor = "#E29526"; // Fendi Yellow
     const mistakeColor = "#70011D";
 
     const [history, setHistory] = useState(() => {
@@ -517,7 +515,14 @@ const Level1 = () => {
                 <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className="ph-bold ph-caret-left text-2xl"></i>
                 </button>
-                <h1 className="font-black text-lg text-white italic tracking-tighter uppercase">ARAON VOCA</h1>
+                {/* ✨ 텍스트 로고 대신 공식 하얀색 로고 적용 ✨ */}
+                <div className="flex flex-col items-center">
+                    <img 
+                      src="/Araon_logo_b.png" 
+                      alt="ARAON SCHOOL" 
+                      className="h-6 w-auto object-contain select-none mb-1 invert brightness-200"
+                    />
+                </div>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
                 </button>
@@ -565,7 +570,6 @@ const Level1 = () => {
                             <h2 className="text-2xl font-black dark:text-white uppercase px-4 break-keep">{DAY_TITLES[selectedDay]}</h2>
                         </div>
 
-                        {/* [이모지 토글 설정 스위치] */}
                         <div className="bg-white dark:bg-[#1E1E1E] p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 mb-6 flex items-center justify-between shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/20 text-amber-500 rounded-full flex items-center justify-center">
@@ -607,7 +611,6 @@ const Level1 = () => {
                             </div>
                         </div>
                         <div className="text-center mb-16 pt-10 px-4">
-                            {/* 설정값에 따라 이모지 힌트 노출 */}
                             {showEmojiInQuiz && <span className="text-6xl mb-6 block animate__animated animate__bounceIn">{questions[currentIndex].emoji}</span>}
                             <h3 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter break-keep leading-tight">{questions[currentIndex].word}</h3>
                             <button onClick={() => speak(questions[currentIndex].word)} className="mt-8 text-slate-300 hover:text-slate-500 transition-colors"><i className="ph-bold ph-speaker-high text-3xl"></i></button>

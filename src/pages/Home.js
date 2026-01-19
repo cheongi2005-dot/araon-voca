@@ -52,11 +52,11 @@ function Home() {
 
   // 각 레벨별 명품 브랜드 포인트 컬러 배정
   const menus = [
-    { id: "01", name: "Foundation Mastery", sub: "초등 기초단어 100", path: "/elementary-100", color: "#5D9CEC" }, // Sky Blue
+    { id: "01", name: "Foundation Mastery", sub: "초등 기초단어 100", path: "/elementary-100", color: "#FFD000" }, // Sky Blue
     { id: "02", name: "Essential Mastery", sub: "Level 1 (초등 필수)", path: "/level-1", color: "#E29526" },     // Fendi Yellow
     { id: "03", name: "Intermediate Mastery", sub: "Level 2 (중등 기초)", path: "/level-2", color: "#9CAF88" },  // Sage Green
     { id: "04", name: "Advanced Mastery", sub: "Level 3 (중등 심화)", path: "/level-3", color: "#006039" },      // Rolex Green
-    { id: "05", name: "Expert Mastery", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#415A77" },        // Steel Blue
+    { id: "05", name: "Expert Mastery", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#151E3D" },        // Indigo Blue
   ];
 
   return (

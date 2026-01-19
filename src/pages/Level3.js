@@ -268,9 +268,8 @@ const Level3 = () => {
     const [currentSessionMistakes, setCurrentSessionMistakes] = useState([]);
     const [randomIdx, setRandomIdx] = useState(0);
 
-    // 테마 컬러 설정
-    const themeColor = "#006039"; // Level 3: Rolex Green
-    const mistakeColor = "#70011D"; // 공통 오답: Chanel Burgundy
+    const themeColor = "#006039"; // Rolex Green
+    const mistakeColor = "#70011D"; 
 
     const [history, setHistory] = useState(() => {
         const saved = localStorage.getItem('araon_voca_level_3');
@@ -396,12 +395,20 @@ const Level3 = () => {
 
     return (
         <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[#F8F9FA] dark:bg-[#121212] transition-all duration-300">
+            {/* Header: 로고 적용 구역 */}
             <header className="sticky top-0 z-20 h-16 flex items-center px-4 justify-between transition-colors border-b border-black/10" 
                     style={{ backgroundColor: themeColor }}>
                 <button onClick={handleBackClick} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className="ph-bold ph-caret-left text-2xl"></i>
                 </button>
-                <h1 className="font-black text-lg text-white italic tracking-tighter uppercase">ARAON VOCA</h1>
+                {/* ✨ 텍스트 대신 공식 로고(화이트) 적용 ✨ */}
+                <div className="flex flex-col items-center">
+                    <img 
+                      src="/Araon_logo_b.png" 
+                      alt="ARAON SCHOOL" 
+                      className="h-6 w-auto object-contain select-none mb-1 invert brightness-200"
+                    />
+                </div>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-white active:opacity-70 rounded-full">
                     <i className={`ph-bold ${isDarkMode ? 'ph-sun' : 'ph-moon'} text-2xl`}></i>
                 </button>
