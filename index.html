@@ -1,48 +1,68 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
-    <meta name="theme-color" content="#000000" />
-    
-    <meta name="description" content="아라온 스쿨 영단어 학습 시스템" />
-    
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>Araon Voca Master</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSYCHOLOGY ARCHIVE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()">DARK / LIGHT</button>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <div id="app">
+        <section id="main-screen">
+            <header class="main-header">
+                <h1>ARCHIVE</h1>
+                <p>PSYCHOLOGY MODULES</p>
+            </header>
+            <div id="chapter-list" class="list-container">
+                </div>
+        </section>
 
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: { extend: { colors: { primary: '#6366f1' } } }
-      }
-    </script>
+        <section id="study-screen" class="hidden">
+            <nav class="top-nav">
+                <button onclick="showMainScreen()">← CLOSE</button>
+                <h2 id="chapter-title-display">TITLE</h2>
+            </nav>
 
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
-      
-      /* ✨ 수정 포인트 3: body 배경색을 검은색으로 고정 ✨ */
-      body { 
-        font-family: 'Pretendard', sans-serif; 
-        -webkit-tap-highlight-color: transparent; 
-        overscroll-behavior-y: none; 
-        background-color: #000000; 
-      }
-      
-      .no-select { -webkit-user-select: none; user-select: none; }
-    </style>
-  </head>
-  <body class="no-select">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="switchTab(event, 'summary')">요약</button>
+                <button class="tab-btn" onclick="switchTab(event, 'quiz')">문제풀이</button>
+                <button class="tab-btn" onclick="switchTab(event, 'review')">오답노트</button>
+            </div>
+
+            <div id="tab-content">
+                <div id="summary-view" class="view-section">
+                    <div class="section-label">INSTRUCTION MANUAL</div>
+                    <div id="summary-list">
+                        </div>
+                </div>
+
+                <div id="quiz-view" class="view-section hidden">
+                    <div class="quiz-header">
+                        <span id="quiz-progress">00 / 20</span>
+                        <button class="refresh-btn" onclick="startQuiz()">RESET</button>
+                    </div>
+                    <div class="question-box">
+                        <p id="question-text">문제가 여기에 표시됩니다.</p>
+                    </div>
+                    <div id="quiz-options" class="options-box">
+                        </div>
+                </div>
+
+                <div id="review-view" class="view-section hidden">
+                    <div class="review-header">
+                        <div class="section-label">WRONG ANSWERS</div>
+                        <button id="retry-wrong-btn" class="retry-btn" onclick="retryWrongAnswers()">오답 다시 풀기</button>
+                    </div>
+                    <div id="wrong-answer-list">
+                        </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
 </html>
