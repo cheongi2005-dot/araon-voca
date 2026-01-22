@@ -38,7 +38,7 @@ const DAY_TITLES = {
     99: "우주 비행사", 100: "마지막 발자국"
 };
 
-const DATA_BY_DAY = {
+export const DATA_BY_DAY = {
   1: [
     { word: "this",              meaning: "이것",                          emoji: "👇" },
     { word: "that",              meaning: "저것",                          emoji: "👉" },
@@ -1256,8 +1256,8 @@ const Elementary100 = () => {
     const [randomIdx, setRandomIdx] = useState(0);
     const [showEmojiInQuiz, setShowEmojiInQuiz] = useState(true);
 
-    const themeColor = "#FFD000"; //
-    const mistakeColor = "#70011D"; // Burgundy
+    const themeColor = "#FFD000"; 
+    const mistakeColor = "#70011D"; 
 
     const [history, setHistory] = useState(() => {
         const saved = localStorage.getItem('araon_voca_elementary_100');
@@ -1265,12 +1265,20 @@ const Elementary100 = () => {
     });
 
     const feedbackMessages = {
-        high: [{ title: "WOW!", text: "정말 대단해요! 완벽하게 이해했군요!" }, { title: "FANTASTIC!", text: "훌륭한 실력입니다!" }],
-        mid: [{ title: "GREAT!", text: "잘하고 있어요! 조금만 더 하면 만점이에요." }, { title: "KEEP GOING!", text: "꾸준히 마스터해봐요!" }],
-        low: [{ title: "CHEER UP!", text: "괜찮아요! 다시 한번 도전해 볼까요?" }, { title: "YOU CAN DO IT!", text: "천천히 익혀 나가면 돼요!" }]
+        high: [
+            { title: "WOW!", text: "정말 대단해요! 완벽하게 이해했군요!", emoji: "🥳" }, 
+            { title: "FANTASTIC!", text: "훌륭한 실력입니다! 당신은 보카 킹!", emoji: "👑" }
+        ],
+        mid: [
+            { title: "GREAT!", text: "잘하고 있어요! 조금만 더 하면 만점이에요.", emoji: "👍" }, 
+            { title: "KEEP GOING!", text: "꾸준히 마스터해봐요! 빛나는 실력입니다.", emoji: "✨" }
+        ],
+        low: [
+            { title: "CHEER UP!", text: "괜찮아요! 다시 한번 도전해 볼까요?", emoji: "💪" }, 
+            { title: "YOU CAN DO IT!", text: "천천히 익혀 나가면 돼요! 다시 읽어보기!", emoji: "📚" }
+        ]
     };
 
-    // 1. 테마 적용 및 전역 배경색 동기화 (컴퓨터 뷰 및 상태바 해결)
     useEffect(() => {
         const root = window.document.documentElement;
         const body = window.document.body;
@@ -1279,16 +1287,15 @@ const Elementary100 = () => {
         if (isDarkMode) {
             root.classList.add('dark');
             localStorage.setItem('theme', 'dark');
-            body.style.backgroundColor = '#0A0A0B'; // 다크 모드 배경색 설정
+            body.style.backgroundColor = '#0A0A0B'; 
         } else {
             root.classList.remove('dark');
             localStorage.setItem('theme', 'light');
-            body.style.backgroundColor = '#F8F9FA'; // 라이트 모드 배경색 설정
+            body.style.backgroundColor = '#F8F9FA'; 
         }
         if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor);
     }, [isDarkMode, themeColor]);
 
-    // 2. 목소리 로드 (경고 해결)
     useEffect(() => {
         const loadVoices = () => {
             const available = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
@@ -1298,7 +1305,6 @@ const Elementary100 = () => {
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }, []);
 
-    // 3. 히스토리 저장
     useEffect(() => {
         localStorage.setItem('araon_voca_elementary_100', JSON.stringify(history));
     }, [history]);
@@ -1335,8 +1341,10 @@ const Elementary100 = () => {
 
         if (isCorrect) {
             setScore(s => s + 1);
-            speak(correctWord);
         } else {
+            // ✅ 오답일 때만 정답 단어 소리 재생
+            speak(correctWord);
+
             const updatedMistakes = [...currentSessionMistakes, correctWord];
             setCurrentSessionMistakes(updatedMistakes);
             setHistory(prev => ({
@@ -1353,14 +1361,18 @@ const Elementary100 = () => {
                 const finalScore = isCorrect ? score + 1 : score;
                 setHistory(prev => ({
                     ...prev, 
-                    [selectedDay]: { ...prev[selectedDay], completed: true, bestScore: Math.max((prev[selectedDay]?.bestScore || 0), finalScore), total: questions.length }
+                    [selectedDay]: { 
+                        ...prev[selectedDay], 
+                        completed: true, 
+                        bestScore: Math.max((prev[selectedDay]?.bestScore || 0), finalScore), 
+                        total: questions.length 
+                    }
                 }));
                 setView('result');
             }
         }, 1200);
     };
 
-    // ✨ useMemo 경고 해결: 퀴즈 옵션 생성 로직
     const currentOptions = useMemo(() => {
         if (view !== 'quiz' || !questions[currentIndex]) return [];
         const correct = questions[currentIndex];
@@ -1369,7 +1381,6 @@ const Elementary100 = () => {
         return [correct, ...others].sort(() => Math.random() - 0.5);
     }, [questions, currentIndex, selectedDay, view]);
 
-    // ✨ useMemo 및 mistakeColor 경고 해결: 오답 리스트 생성
     const mistakeList = useMemo(() => {
         if (!selectedDay || !history[selectedDay]?.attempts) return [];
         const allMissed = history[selectedDay].attempts.flat();
@@ -1420,16 +1431,19 @@ const Elementary100 = () => {
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 pb-10">
-                            {Object.keys(DAY_TITLES)
-                                .sort((a, b) => Number(a) - Number(b)) // 정렬 오류 해결
-                                .map(d => (
+                            {Object.keys(DAY_TITLES).sort((a, b) => Number(a) - Number(b)).map(d => (
                                 <button key={d} onClick={() => { setSelectedDay(d); setView('menu'); }} 
                                         className={`p-6 rounded-[2.2rem] border-2 flex items-center justify-between transition-all active:scale-[0.97] ${history[d]?.completed ? 'bg-white border-slate-200 dark:bg-[#1E1E1E] dark:border-slate-800' : 'bg-white border-slate-100 dark:bg-[#1E1E1E] dark:border-slate-800 shadow-sm'}`}>
                                     <div className="flex items-center">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 text-white`} style={{ backgroundColor: history[d]?.completed ? themeColor : '#cbd5e1' }}>
                                             <span className="font-black text-xs">D{d}</span>
                                         </div>
-                                        <div className="text-left font-bold dark:text-white/90">{DAY_TITLES[d]}</div>
+                                        <div className="text-left">
+                                            <div className="font-bold dark:text-white/90">{DAY_TITLES[d]}</div>
+                                            {history[d]?.completed && (
+                                                <div className="text-[10px] font-black opacity-30">Best Score: {history[d].bestScore}/{history[d].total}</div>
+                                            )}
+                                        </div>
                                     </div>
                                     <i className="ph-bold ph-caret-right text-slate-300"></i>
                                 </button>
@@ -1444,31 +1458,52 @@ const Elementary100 = () => {
                             <div className="w-20 h-20 text-white rounded-[2.2rem] flex items-center justify-center mx-auto mb-6 shadow-lg font-black text-2xl" style={{ backgroundColor: themeColor }}>D{selectedDay}</div>
                             <h2 className="text-2xl font-black dark:text-white uppercase break-keep px-4">{DAY_TITLES[selectedDay]}</h2>
                         </div>
-
-                        {/* showEmojiInQuiz 상태 사용 */}
-                        <div className="bg-white dark:bg-[#1E1E1E] p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 mb-6 flex items-center justify-between shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-sky-50 dark:bg-sky-900/20 text-sky-500 rounded-full flex items-center justify-center"><i className="ph-fill ph-sparkle text-xl"></i></div>
-                                <div><p className="text-xs font-black dark:text-white uppercase">Emoji Hints</p><p className="text-[10px] text-zinc-400 font-bold">퀴즈 중 이모지 표시</p></div>
+                            {/* ✅ Emoji Hints 설정 구역 */}
+                            <div className="bg-white dark:bg-[#1E1E1E] p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 mb-6 flex items-center justify-between shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    {/* 배경색에 테마색의 20% 투명도를 적용하고, 아이콘색을 테마색으로 변경했습니다 */}
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center" 
+                                        style={{ backgroundColor: `${themeColor}20`, color: themeColor }}>
+                                        <i className="ph-fill ph-sparkle text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black dark:text-white uppercase">Emoji Hints</p>
+                                        <p className="text-[10px] text-zinc-400 font-bold">퀴즈 중 이모지 표시</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setShowEmojiInQuiz(!showEmojiInQuiz)} 
+                                    className="w-14 h-8 rounded-full transition-all relative shadow-inner"
+                                    style={{ backgroundColor: showEmojiInQuiz ? themeColor : (isDarkMode ? '#2D2D2D' : '#E4E4E7') }}
+                                >
+                                    <div className={`w-6 h-6 bg-white rounded-full shadow-md absolute top-1 transition-all duration-300 ${showEmojiInQuiz ? 'left-7' : 'left-1'}`}></div>
+                                </button>
                             </div>
-                            <button onClick={() => setShowEmojiInQuiz(!showEmojiInQuiz)} className={`w-14 h-8 rounded-full transition-all relative ${showEmojiInQuiz ? 'bg-sky-400' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
-                                <div className={`w-6 h-6 bg-white rounded-full shadow-md absolute top-1 transition-all ${showEmojiInQuiz ? 'left-7' : 'left-1'}`}></div>
-                            </button>
-                        </div>
 
                         <div className="space-y-4">
                             <button onClick={() => setView('list')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2.2rem] flex items-center shadow-sm" style={{ borderColor: themeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${themeColor}20`, color: themeColor }}><i className="ph-fill ph-book-open text-2xl"></i></div>
                                 <div className="text-left"><h3 className="font-bold dark:text-slate-100">단어 학습</h3><p className="text-slate-400 text-xs font-bold">Vocabulary</p></div>
                             </button>
-                            {/* startQuiz 함수 사용 */}
+
                             <button onClick={startQuiz} className="w-full p-6 text-white rounded-[2.2rem] flex items-center shadow-lg active:scale-95 transition-all" style={{ backgroundColor: themeColor }}>
                                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4"><i className="ph-fill ph-lightning text-2xl"></i></div>
-                                <div className="text-left"><h3 className="font-bold">퀴즈 시작</h3><p className="text-white/60 text-xs font-bold">Start Quiz</p></div>
+                                <div className="text-left">
+                                    <h3 className="font-bold">퀴즈 시작</h3>
+                                    <p className="text-white/60 text-xs font-bold">
+                                        {history[selectedDay]?.completed ? `최고 기록: ${history[selectedDay].bestScore} / ${history[selectedDay].total}` : "Start Quiz"}
+                                    </p>
+                                </div>
                             </button>
+
                             <button onClick={() => setView('mistakes')} className="w-full p-6 bg-white dark:bg-[#1E1E1E] border-2 rounded-[2.2rem] flex items-center shadow-sm" style={{ borderColor: mistakeColor }}>
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style={{ backgroundColor: `${mistakeColor}20`, color: mistakeColor }}><i className="ph-fill ph-warning-circle text-2xl"></i></div>
-                                <div className="text-left"><h3 className="font-bold" style={{ color: mistakeColor }}>오답노트</h3><p className="text-slate-400 text-xs font-bold">Review</p></div>
+                                <div className="text-left">
+                                    <h3 className="font-bold" style={{ color: mistakeColor }}>오답노트</h3>
+                                    <p className="text-slate-400 text-xs font-bold">
+                                        {mistakeList.length > 0 ? `${mistakeList.length}개의 오답 복습하기` : "Review"}
+                                    </p>
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -1476,7 +1511,6 @@ const Elementary100 = () => {
 
                 {view === 'quiz' && (
                     <div className="animate__animated animate__fadeIn">
-                        {/* currentIndex, questions 사용 */}
                         <div className="flex justify-between items-center mb-10 text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>
                             <span>{currentIndex + 1} / {questions.length}</span>
                             <div className="flex-1 mx-4 h-1.5 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
@@ -1486,13 +1520,12 @@ const Elementary100 = () => {
                         <div className="text-center mb-16 pt-10 px-2">
                             {showEmojiInQuiz && questions[currentIndex].emoji && <span className="text-6xl mb-6 block animate__animated animate__bounceIn">{questions[currentIndex].emoji}</span>}
                             <h3 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter">{questions[currentIndex].word}</h3>
-                            <button onClick={() => speak(questions[currentIndex].word)} className="mt-8 text-slate-300 hover:text-slate-500 transition-colors"><i className="ph-bold ph-speaker-high text-3xl"></i></button>
+                            <button onClick={() => speak(questions[currentIndex].word)} className="mt-8 text-slate-300 active:scale-90 transition-transform"><i className="ph-bold ph-speaker-high text-3xl"></i></button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
-                            {/* currentOptions, showFeedback, handleAnswer, selectedAnswer 사용 */}
                             {currentOptions.map((opt, i) => (
                                 <button key={i} disabled={showFeedback} onClick={() => handleAnswer(opt)}
-                                    className={`p-6 rounded-[2.2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm' : opt.word === questions[currentIndex].word ? 'bg-emerald-600 border-emerald-500 text-white' : (selectedAnswer === opt ? 'bg-[#70011D] border-[#70011D] text-white' : 'opacity-20')}`}>
+                                    className={`p-6 rounded-[2.2rem] font-bold text-lg border-2 transition-all ${!showFeedback ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-slate-800 dark:text-slate-300 shadow-sm' : opt.word === questions[currentIndex].word ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg scale-105' : (selectedAnswer === opt ? 'bg-[#70011D] border-[#70011D] text-white' : 'opacity-20')}`}>
                                     {opt.meaning}
                                 </button>
                             ))}
@@ -1504,7 +1537,6 @@ const Elementary100 = () => {
                     <div className="animate__animated animate__fadeIn pb-10">
                         <div className="mb-6 text-center"><h3 className="text-lg font-black dark:text-white">{DAY_TITLES[selectedDay]}</h3></div>
                         <div className="space-y-3">
-                            {/* DATA_BY_DAY 사용 */}
                             {DATA_BY_DAY[Number(selectedDay)]?.map((item, idx) => (
                                 <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border border-slate-100 dark:border-slate-800 rounded-[1.5rem] flex items-center justify-between shadow-sm">
                                     <div className="flex-1 pr-2">
@@ -1525,7 +1557,6 @@ const Elementary100 = () => {
                     <div className="animate__animated animate__fadeIn pb-10">
                         <div className="text-center mb-8 px-1"><span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: mistakeColor }}>Analysis</span><h3 className="text-xl font-black mt-1 dark:text-white">내 오답 리스트</h3></div>
                         <div className="space-y-3">
-                            {/* mistakeList 사용 */}
                             {mistakeList.map((item, idx) => (
                                 <div key={idx} className="p-5 bg-white dark:bg-[#1E1E1E] border-2 rounded-[1.5rem] flex items-center justify-between shadow-sm" style={{ borderColor: `${mistakeColor}20` }}>
                                     <div className="flex items-center">
@@ -1544,17 +1575,89 @@ const Elementary100 = () => {
                 )}
                 
                 {view === 'result' && (
-                    <div className="animate__animated animate__fadeIn text-center py-10 px-4">
-                        <div className="w-28 h-28 text-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl" style={{ backgroundColor: themeColor }}><i className="ph-fill ph-crown text-6xl"></i></div>
-                        {/* score, randomIdx, feedbackMessages 사용 */}
-                        <h2 className="text-3xl font-black mb-10 italic uppercase dark:text-white break-keep">{feedbackMessages[score >= (questions.length * 0.8) ? 'high' : score >= (questions.length * 0.5) ? 'mid' : 'low'][randomIdx].title}</h2>
-                        <div className="w-full p-10 rounded-[3rem] text-white mb-10 border-t-4 border-white/20 shadow-2xl" style={{ backgroundColor: themeColor }}>
-                            <p className="text-white/60 text-[10px] font-black uppercase mb-3 tracking-[0.3em]">Final Score</p>
-                            <div className="text-7xl font-black tracking-tighter text-white">{score} <span className="text-2xl text-white/40 font-normal">/ {questions.length}</span></div>
-                        </div>
-                        <button onClick={() => setView('home')} className="w-full p-6 text-white rounded-[1.8rem] font-black text-xl shadow-lg active:scale-95 transition-all" style={{ backgroundColor: themeColor }}>홈으로 돌아가기</button>
-                    </div>
-                )}
+                  <div className="animate__animated animate__fadeIn flex flex-col items-center py-6 px-4">
+                      
+                      {(() => {
+                          const level = score >= (questions.length * 0.8) ? 'high' : score >= (questions.length * 0.5) ? 'mid' : 'low';
+                          const msg = feedbackMessages[level][randomIdx] || feedbackMessages[level][0];
+                          
+                          return (
+                              <>
+                                  {/* 1. 배지 영역: 후광 효과와 입체감 부여 */}
+                                  <div className="relative mb-10">
+                                      {/* 테마색을 활용한 은은한 빛 효과 */}
+                                      <div className="w-32 h-32 rounded-full blur-3xl absolute opacity-30 animate-pulse" 
+                                          style={{ backgroundColor: themeColor }}></div>
+                                      
+                                      <div className="w-32 h-32 bg-white dark:bg-[#1E1E1E] rounded-[2.8rem] flex items-center justify-center relative shadow-2xl border-2 animate__animated animate__bounceIn" 
+                                          style={{ borderColor: themeColor }}>
+                                          <span className="text-7xl drop-shadow-xl">{msg.emoji}</span>
+                                      </div>
+                                  </div>
+                                  
+                                  {/* 2. 피드백 텍스트 영역: 타이포그래피 강조 */}
+                                  <div className="mb-10 text-center">
+                                      <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-3 dark:text-white animate__animated animate__zoomIn">
+                                          {msg.title}
+                                      </h2>
+                                      <p className="text-slate-500 dark:text-slate-400 font-bold text-sm px-6 break-keep leading-relaxed">
+                                          {msg.text}
+                                      </p>
+                                  </div>
+
+                                  {/* 3. 스탯 카드 영역: 현대적인 대시보드 느낌 */}
+                                  <div className="w-full bg-white dark:bg-[#1E1E1E] rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-white/5 mb-12 relative overflow-hidden">
+                                      {/* 카드 상단 강조선 */}
+                                      <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: themeColor }}></div>
+
+                                      <div className="flex justify-between items-center mb-8">
+                                          <div className="text-left">
+                                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">My Score</p>
+                                              <div className="flex items-baseline gap-1">
+                                                  <span className="text-6xl font-black tracking-tighter" style={{ color: themeColor }}>{score}</span>
+                                                  <span className="text-xl font-bold text-slate-300">/ {questions.length}</span>
+                                              </div>
+                                          </div>
+                                          <div className="text-right">
+                                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Accuracy</p>
+                                              <span className="text-3xl font-black dark:text-white">
+                                                  {Math.round((score / questions.length) * 100)}%
+                                              </span>
+                                          </div>
+                                      </div>
+
+                                      {/* 입체적인 성취도 바 */}
+                                      <div className="space-y-2">
+                                          <div className="flex justify-between items-center">
+                                              <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">Mastery Progress</span>
+                                          </div>
+                                          <div className="w-full h-4 bg-slate-100 dark:bg-black/30 rounded-full overflow-hidden shadow-inner p-1">
+                                              <div className="h-full transition-all duration-1000 ease-out rounded-full shadow-sm" 
+                                                  style={{ 
+                                                      width: `${(score / questions.length) * 100}%`, 
+                                                      backgroundColor: themeColor,
+                                                      backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%, transparent)' ,
+                                                      backgroundSize: '20px 20px'
+                                                  }}></div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </>
+                          );
+                      })()}
+
+                      {/* 4. 액션 버튼: 강조된 그림자와 큼직한 버튼 */}
+                      <button onClick={() => setView('home')} 
+                              className="w-full p-6 text-white rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3" 
+                              style={{ 
+                                  backgroundColor: themeColor,
+                                  boxShadow: `0 20px 40px -12px ${themeColor}66` 
+                              }}>
+                          <i className="ph-bold ph-house-line text-2xl"></i>
+                          홈으로 돌아가기
+                      </button>
+                  </div>
+              )}
             </main>
         </div>
     );

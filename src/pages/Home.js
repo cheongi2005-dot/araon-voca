@@ -1,128 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+
+const STORAGE_KEYS = [
+  'araon_voca_elementary_100', 'araon_voca_level_1', 'araon_voca_level_2',
+  'araon_voca_level_3', 'araon_voca_level_4', 'araon_voca_level_5'
+];
 
 function Home() {
   const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const [voices, setVoices] = useState([]);
-  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(() => 
-    parseInt(localStorage.getItem('araon_voca_voice_idx') || '0')
-  );
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(() => parseInt(localStorage.getItem('araon_voca_voice_idx') || '0'));
 
-  // ✨ 배경색 및 시스템 설정 동기화 ✨
   useEffect(() => {
-    const root = window.document.documentElement;
-    const body = window.document.body; 
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-
-    if (isDark) { 
-      root.classList.add('dark'); 
-      localStorage.setItem('theme', 'dark'); 
-      body.style.backgroundColor = '#0A0A0B'; 
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#0A0A0B');
-    } else { 
-      root.classList.remove('dark'); 
-      localStorage.setItem('theme', 'light'); 
-      body.style.backgroundColor = '#F8F9FA'; 
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#F8F9FA');
-    }
+    const isDarkTheme = isDark;
+    document.documentElement.classList.toggle('dark', isDarkTheme);
+    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+    document.body.style.backgroundColor = isDarkTheme ? '#0A0A0B' : '#F8F9FA';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', isDarkTheme ? '#0A0A0B' : '#F8F9FA');
   }, [isDark]);
 
   useEffect(() => {
-    const loadVoices = () => {
-      const available = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
-      setVoices(available);
-    };
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    const load = () => setVoices(window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en')));
+    load(); window.speechSynthesis.onvoiceschanged = load;
   }, []);
 
-  const handleVoiceChange = (index) => {
-    setSelectedVoiceIndex(index);
-    localStorage.setItem('araon_voca_voice_idx', index);
-  };
-
-  const resetAllData = () => {
-    if (window.confirm('모든 학습 기록과 오답 노트를 초기화할까요?')) {
-      // ✨ Level 5 저장 키 추가 ✨
-      const keys = [
-        'araon_voca_elementary_100', 
-        'araon_voca_level_1', 
-        'araon_voca_level_2', 
-        'araon_voca_level_3', 
-        'araon_voca_level_4',
-        'araon_voca_level_5'
-      ];
-      keys.forEach(key => localStorage.removeItem(key));
-      window.location.reload();
-    }
-  };
+  // ✨ 수정된 로직: 레벨별 오답 수를 각각 합산하여 상세 페이지와 숫자를 맞춤 ✨
+  const totalMistakes = useMemo(() => {
+    let count = 0;
+    STORAGE_KEYS.forEach(k => {
+      const data = JSON.parse(localStorage.getItem(k) || '{}');
+      const levelWords = new Set(); // 레벨 내부에서만 중복 제거
+      Object.values(data).forEach(d => d.attempts?.flat().forEach(w => levelWords.add(w)));
+      count += levelWords.size; // 각 레벨의 오답 수를 더함
+    });
+    return count;
+  }, []);
 
   const menus = [
-    { id: "01", name: "Foundation Mastery", sub: "초등 기초단어 100", path: "/elementary-100", color: "#FFD000" }, 
-    { id: "02", name: "Essential Mastery", sub: "Level 1 (초등 필수)", path: "/level-1", color: "#E29526" },     
-    { id: "03", name: "Intermediate Mastery", sub: "Level 2 (중등 기초)", path: "/level-2", color: "#9CAF88" },  
-    { id: "04", name: "Advanced Mastery", sub: "Level 3 (중등 심화)", path: "/level-3", color: "#006039" },      
-    { id: "05", name: "Expert Mastery", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#151E3D" },
-    // ✨ 06번 Level 5: 고등 심화 추가 ✨
-    { id: "06", name: "Academic Mastery", sub: "Level 5 (고등 심화)", path: "/level-5", color: "#32127A" },        
+    { id: "01", name: "Foundation", sub: "초등 기초 100", path: "/elementary-100", color: "#FFD000" },
+    { id: "02", name: "Essential", sub: "Level 1 (초등 필수)", path: "/level-1", color: "#E29526" },
+    { id: "03", name: "Intermediate", sub: "Level 2 (중등 기초)", path: "/level-2", color: "#9CAF88" },
+    { id: "04", name: "Advanced", sub: "Level 3 (중등 심화)", path: "/level-3", color: "#006039" },
+    { id: "05", name: "Expert", sub: "Level 4 (고등 기초)", path: "/level-4", color: "#151E3D" },
+    { id: "06", name: "Academic", sub: "Level 5 (고등 심화)", path: "/level-5", color: "#32127A" },
   ];
 
   return (
-    <div className="min-h-screen transition-colors duration-500 font-sans pt-24">
-      <div className="max-w-md mx-auto flex flex-col px-8 pb-24">
+    <div className="min-h-screen transition-colors duration-500 font-sans pt-20 pb-10">
+      <div className="max-w-md mx-auto px-8">
         
-        <header className="flex justify-between items-start mb-16">
+        <header className="flex justify-between items-center mb-10">
           <div className="flex flex-col">
-            <img 
-              src="/Araon_logo_b.png" 
-              alt="ARAON SCHOOL" 
-              className={`h-9 w-auto object-contain select-none mb-1 transition-all duration-500 ${isDark ? 'invert brightness-200' : ''}`}
-            />
-            <p className="text-[10px] font-black uppercase tracking-[0.45em] text-indigo-500/80 ml-1">
-              Vocabulary System
-            </p>
+            <img src="/Araon_logo_b.png" alt="ARAON" className={`h-8 w-auto ${isDark ? 'invert brightness-200' : ''}`} />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-indigo-500/80 ml-0.5">Voca System</p>
           </div>
-          <button 
-            onClick={() => setIsDark(!isDark)} 
-            className="p-3 rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-md border border-zinc-100 dark:border-zinc-800 text-zinc-400 active:scale-90 transition-transform"
-          >
+          <button onClick={() => setIsDark(!isDark)} className="p-3 rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-sm border border-zinc-100 dark:border-zinc-800 text-zinc-400 active:scale-90">
             <i className={`ph-bold ${isDark ? 'ph-sun' : 'ph-moon'} text-xl`}></i>
           </button>
         </header>
 
-        <nav className="flex-1 space-y-5 animate__animated animate__fadeInUp">
+        <Link to="/my-voca" className="group block mb-6">
+          <div className="flex items-center justify-between bg-white dark:bg-[#1E1E1E] p-6 rounded-[2.2rem] shadow-xl border-2 border-[#70011D]/20 active:scale-[0.98] transition-all">
+            <div className="flex items-center gap-5">
+              <div className="w-11 h-11 bg-[#70011D] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#70011D]/30"><i className="ph-fill ph-star text-xl"></i></div>
+              <div>
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-[#70011D]">Personal Collection</h3>
+                <p className="text-xl font-black dark:text-white">나의 단어장 <span className="ml-2 text-xs px-2 py-0.5 bg-[#70011D] text-white rounded-full font-black">{totalMistakes}</span></p>
+              </div>
+            </div>
+            <i className="ph-bold ph-caret-right text-[#70011D]/40 group-hover:text-[#70011D] transition-colors"></i>
+          </div>
+        </Link>
+
+        <nav className="space-y-4">
           {menus.map((m) => (
             <Link key={m.id} to={m.path} className="group block">
-              <div className="flex items-center justify-between bg-white dark:bg-[#1E1E1E] p-6 rounded-[2.2rem] shadow-sm border border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all">
-                <div className="flex items-center gap-6">
+              <div className="flex items-center justify-between bg-white dark:bg-[#1E1E1E] p-5 rounded-[2.2rem] shadow-sm border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 transition-all">
+                <div className="flex items-center gap-5">
                   <span className="text-[10px] font-black text-zinc-200 dark:text-zinc-800">{m.id}</span>
                   <div>
-                    <h3 className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: m.color }}>{m.name}</h3>
-                    <p className="text-xl font-bold tracking-tight dark:text-white">{m.sub}</p>
+                    <h3 className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: m.color }}>{m.name}</h3>
+                    <p className="text-lg font-bold tracking-tight dark:text-white">{m.sub}</p>
                   </div>
                 </div>
-                <i className="ph-bold ph-caret-right text-zinc-300"></i>
+                <i className="ph-bold ph-caret-right text-zinc-200 group-hover:text-zinc-400"></i>
               </div>
             </Link>
           ))}
         </nav>
 
-        <footer className="mt-16 pt-8 border-t border-zinc-100 dark:border-zinc-800 space-y-6">
-          <div className="bg-white dark:bg-[#1E1E1E] p-5 rounded-[2.2rem] shadow-sm">
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 px-1">Voice Settings</p>
-            <select 
-              value={selectedVoiceIndex} 
-              onChange={(e) => handleVoiceChange(parseInt(e.target.value))}
-              className="w-full p-3.5 bg-[#F8F9FA] dark:bg-[#0A0A0B] rounded-2xl text-xs font-bold outline-none appearance-none text-center dark:text-white"
-            >
-              {voices.length > 0 ? voices.map((v, i) => (
-                <option key={i} value={i}>{v.name}</option>
-              )) : <option>Loading voices...</option>}
+        <footer className="mt-12 pt-8 border-t border-zinc-100 dark:border-zinc-800 space-y-5">
+          <div className="bg-white dark:bg-[#1E1E1E] p-4 rounded-[2rem] shadow-sm flex items-center">
+            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest px-2 mr-4 border-r border-zinc-100 dark:border-zinc-800">Voice</p>
+            <select value={selectedVoiceIndex} onChange={(e) => { setSelectedVoiceIndex(parseInt(e.target.value)); localStorage.setItem('araon_voca_voice_idx', e.target.value); }} className="flex-1 bg-transparent text-xs font-bold outline-none dark:text-white">
+              {voices.map((v, i) => (<option key={i} value={i}>{v.name}</option>))}
             </select>
           </div>
-          <button onClick={resetAllData} className="w-full p-4 bg-[#70011D] text-white rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.25em] active:scale-[0.98]">
-            Reset Application Data
-          </button>
+          <button onClick={() => { if(window.confirm('기록을 초기화할까요?')) { STORAGE_KEYS.forEach(k => localStorage.removeItem(k)); window.location.reload(); } }} className="w-full p-4 bg-[#70011D] text-white rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-[#70011D]/20 active:scale-[0.98]">Reset All Progress</button>
         </footer>
       </div>
     </div>
